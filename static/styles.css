@@ -1,0 +1,35 @@
+
+.map {
+    width: 80vw;
+    height: 70vh;
+}
+
+.form-section {
+    width: 60vw;
+    margin: 20px auto;    
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+
+label {
+    font-weight: bold;
+}
+
+input {
+    display: block !important;
+    margin-bottom: 0.50rem !important;
+}
+
+button {
+	background: none;
+	border: solid 1px;
+    margin-top: 1rem;
+	border-radius: 2em;
+	font: inherit;
+	padding: 0.75em 2em;
+    color: #4fc08d;
+}
