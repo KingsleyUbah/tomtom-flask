@@ -19,97 +19,101 @@ var map = null
 var instructions = null
 var results = null
 
-document.getElementById("submit-btn").addEventListener("click", loadMap)
 
-function loadMap() {
-    const lat0 = document.getElementById("lat-origin").value
-    const long0 = document.getElementById("long-origin").value
+document.getElementById("submit-btn").addEventListener("click", calculateRoute)
 
-    const lat1 = document.getElementById("lat-dest").value
-    const long1 = document.getElementById("long-dest").value
+function calculateRoute() {
+    var lat0 = document.getElementById("lat-origin").value
+var long0 = document.getElementById("long-origin").value
 
-    
+var lat1 = document.getElementById("lat-dest").value
+var long1 = document.getElementById("long-dest").value
+
     fetch(`https://api.tomtom.com/routing/1/calculateRoute/${lat0},${long0}:${lat1},${long1}/json?routeRepresentation=summaryOnly&instructionsType=text&key=rXGP0WD0wr73ApA886gAtl5QPiAgwfeX`)
     .then(response => response.json())
     .then((data) => {
-
-        const {hrs, mins, secs} = convertTime(data.routes[0].summary.travelTimeInSeconds)
-        document.getElementById('time').innerHTML = `Your Journey will take ${hrs} hours, ${mins} minutes and ${secs} seconds`        
-
-        instructions = data.routes[0].guidance.instructions
-
-        // create lable for select input and set text content
-        let label = document.createElement('label')
-        label.innerHTML = "Choose a time to stop for a meal"        
-
-        // Create select and set attributes
-        let select = document.createElement('select')
-        select.id = "cars"
-        select.name = "cars"
-        select.onchange = getRestaurants
-
-        let button = document.createElement('button')
-        button.id = "button"
-        button.innerHTML = "Get restaurants"
-
-        // Keep track of the minute already included
-        let minTracker = null
-
-        instructions.forEach((instruction, index) => {
-            // We don't want to get the first two and last two
-            if(index !== 0 && index !== 1 && index !== instruction.length - 1) {
-                // Get minute for the location
-                    let {hrs, mins} = convertTime(instruction.travelTimeInSeconds)                            
-
-                    if (mins !== minTracker) {
-                        // Creation select option
-                        minTracker = mins
-                        let option = document.createElement('option')                    
-
-                        // add attributes
-                        option.setAttribute('value', instruction.travelTimeInSeconds)
-                        option.innerHTML = `${hrs} ${hrs === 1 ? 'hour': 'hours'} and ${mins} minutes in`                    
-
-                        // Append option to select
-                        select.appendChild(option)
-                    }                    
-                }
-                                
-            })                
-
-        // Now, insert into the page
-        let targetDiv = document.getElementById("select-input-div")
-        targetDiv.appendChild(label)
-        targetDiv.appendChild(select)
-        targetDiv.appendChild(button)
-
-        let locations = [
-            /*
-            { lat: '34.024212',  lng: '-118.496475'},
-            { lat: '33.953350',  lng: '-117.396156'}
-            */
-            { lat: lat0,  lng: long0},
-            { lat: lat1,  lng: long1}
-        ]
-        
-        map = tt.map({
-            key: 'rXGP0WD0wr73ApA886gAtl5QPiAgwfeX',
-            container: 'map',
-            center: locations[0],
-            bearing: 0,
-            maxZoom: 7,
-            minZoom: 1,
-            pitch: 60,
-            zoom: 14,
-        });        
-        
-        map.addControl(new tt.FullscreenControl()); 
-        map.addControl(new tt.NavigationControl());         
-        
-        locations.forEach((location, index) => {                    
-            new tt.Marker().setLngLat(location).addTo(map)                                                                                                                                      
-        })               
+        // Pass response data and coordinates
+        loadMapWithStopTimes(data, lat0, long0, lat1, long1)
     })    
+}
+
+function loadMapWithStopTimes(data, lat0, long0, lat1, long1) {    
+    const {hrs, mins, secs} = convertTime(data.routes[0].summary.travelTimeInSeconds)
+    document.getElementById('time').innerHTML = `Your Journey will take ${hrs} hours, ${mins} minutes and ${secs} seconds`        
+
+    instructions = data.routes[0].guidance.instructions
+
+    // create label for select input and set text content
+    let label = document.createElement('label')
+    label.innerHTML = "Choose a time to stop for a meal"        
+
+    // Create select and set attributes
+    let select = document.createElement('select')
+    select.id = "cars"
+    select.name = "cars"
+    select.onchange = getRestaurants
+
+    let button = document.createElement('button')
+    button.id = "button"
+    button.innerHTML = "Get restaurants"
+
+    // Keep track of the minute already included
+    let minTracker = null
+
+    instructions.forEach((instruction, index) => {
+        // We don't want to get the first two and last two
+        if(index !== 0 && index !== 1 && index !== instruction.length - 1) {
+            // Get minute for the location
+                let {hrs, mins} = convertTime(instruction.travelTimeInSeconds)                            
+
+                if (mins !== minTracker) {
+                    // Creation select option
+                    minTracker = mins
+                    let option = document.createElement('option')                    
+
+                    // add attributes
+                    option.setAttribute('value', instruction.travelTimeInSeconds)
+                    option.innerHTML = `${hrs} ${hrs === 1 ? 'hour': 'hours'} and ${mins} minutes in`                    
+
+                    // Append option to select
+                    select.appendChild(option)
+                }                    
+            }
+                            
+        })                
+
+    // Now, insert into the page
+    let targetDiv = document.getElementById("select-input-div")
+    targetDiv.appendChild(label)
+    targetDiv.appendChild(select)
+    targetDiv.appendChild(button)
+
+    let locations = [
+        /*
+        { lat: '34.024212',  lng: '-118.496475'},
+        { lat: '33.953350',  lng: '-117.396156'}
+        */
+        { lat: lat0,  lng: long0},
+        { lat: lat1,  lng: long1}
+    ]
+    
+    map = tt.map({
+        key: 'rXGP0WD0wr73ApA886gAtl5QPiAgwfeX',
+        container: 'map',
+        center: locations[0],
+        bearing: 0,
+        maxZoom: 7,
+        minZoom: 1,
+        pitch: 60,
+        zoom: 14,
+    });        
+    
+    map.addControl(new tt.FullscreenControl()); 
+    map.addControl(new tt.NavigationControl());         
+    
+    locations.forEach((location, index) => {                    
+        new tt.Marker().setLngLat(location).addTo(map)                                                                                                                                      
+    })               
 }
 
 function getRestaurants() {    
